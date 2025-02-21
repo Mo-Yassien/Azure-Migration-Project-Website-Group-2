@@ -1,0 +1,105 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_Web_Server_name": {
+            "defaultValue": "Web-Server",
+            "type": "String"
+        },
+        "availabilitySets_AVAILABILITY_SET_externalid": {
+            "defaultValue": "/subscriptions/d3438c71-7a08-4c45-baa1-1e0247c93881/resourceGroups/Azure-Migration-Project-(Website)/providers/Microsoft.Compute/availabilitySets/AVAILABILITY-SET",
+            "type": "String"
+        },
+        "disks_Web_Server_OsDisk_1_29202734fe3c4aa4a40b1f7f80427e6a_externalid": {
+            "defaultValue": "/subscriptions/d3438c71-7a08-4c45-baa1-1e0247c93881/resourceGroups/Azure-Migration-Project-(Website)/providers/Microsoft.Compute/disks/Web-Server_OsDisk_1_29202734fe3c4aa4a40b1f7f80427e6a",
+            "type": "String"
+        },
+        "networkInterfaces_web_server190_externalid": {
+            "defaultValue": "/subscriptions/d3438c71-7a08-4c45-baa1-1e0247c93881/resourceGroups/Azure-Migration-Project-(Website)/providers/Microsoft.Network/networkInterfaces/web-server190",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('virtualMachines_Web_Server_name')]",
+            "location": "eastus",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_DS1_v2"
+                },
+                "availabilitySet": {
+                    "id": "[parameters('availabilitySets_AVAILABILITY_SET_externalid')]"
+                },
+                "additionalCapabilities": {
+                    "hibernationEnabled": false
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2022-datacenter-azure-edition-hotpatch",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_Web_Server_name'), '_OsDisk_1_29202734fe3c4aa4a40b1f7f80427e6a')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[parameters('disks_Web_Server_OsDisk_1_29202734fe3c4aa4a40b1f7f80427e6a_externalid')]"
+                        },
+                        "deleteOption": "Detach",
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "SCSI"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_Web_Server_name')]",
+                    "adminUsername": "Admin-1",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true,
+                        "patchSettings": {
+                            "patchMode": "AutomaticByPlatform",
+                            "automaticByPlatformSettings": {
+                                "rebootSetting": "IfRequired"
+                            },
+                            "assessmentMode": "ImageDefault",
+                            "enableHotpatching": true
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_web_server190_externalid')]",
+                            "properties": {
+                                "deleteOption": "Detach"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        }
+    ]
+}
